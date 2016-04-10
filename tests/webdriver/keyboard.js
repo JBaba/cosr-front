@@ -10,7 +10,7 @@ describe('keyboard navigation', function() {
         yield browser.keys(["TAB","TAB","TAB","TAB","TAB"]);
 
         var focused = yield inspectElement(yield browser.elementActive());
-        assert.equal(focused.tag, "body");
+        assert.equal(focused.tag, "a");
 
         // Arrow down should select the first result.
         yield browser.keys(["ARROW_DOWN"]);
