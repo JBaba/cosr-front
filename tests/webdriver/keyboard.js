@@ -12,20 +12,6 @@ describe('keyboard navigation', function() {
         var focused = yield inspectElement(yield browser.elementActive());
         var ele = yield browser.elementActive();
 
-        
-
-        browser.elementIdName(ele.value.ELEMENT).then(function(res) {
-            console.log("Ele Name:"+res.value);
-        });
-
-        browser.elementIdAttribute(ele.value.ELEMENT,'id').then(function(res) {
-            console.log("Id value:"+res.value);
-        });
-
-        browser.getValue('#q').then(function(value) {
-            console.log(value); // outputs: "John Doe"
-        });
-
         //yield is used for wait and process for function clousers
         selectedEle =yield printElement(ele);
 
