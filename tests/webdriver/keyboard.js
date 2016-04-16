@@ -11,21 +11,23 @@ describe('keyboard navigation', function() {
 
         var focused = yield inspectElement(yield browser.elementActive());
         var ele = yield browser.elementActive();
-        //ele = ele.value.ELEMENT;
-        eleValue = browser.getAttribute(ele,'id');
-        var ele2 = browser.getValue('#q');
 
-        yield sleep(1000);
-        console.log(ele2)
-        console.log(ele)
-        console.log('Present Test:');
-        browser.elementIdName(elt.value.ELEMENT).then(function(res) {
+        
+
+        browser.elementIdName(ele.value.ELEMENT).then(function(res) {
+            console.log("Ele Name:"+res.value);
+        });
+
+        browser.elementIdAttribute(ele.value.ELEMENT,'id').then(function(res) {
             console.log("Id value:"+res.value);
         });
-        console.log('My test:');
-        browser.elementIdAttribute(elt.value.ELEMENT,'id').then(function(res) {
-            console.log("Id value:"+res.value);
+
+        browser.getValue('#q').then(function(value) {
+            console.log(value); // outputs: "John Doe"
         });
+
+        //yield is used for wait and process for function clousers
+        selectedEle =yield printElement(ele);
 
         assert.equal(focused.tag, "a");
 
@@ -35,5 +37,21 @@ describe('keyboard navigation', function() {
         assert.ok(focused.text.indexOf("Apple") >= 0);
 
     });
+
+    printElement = function(ele) {
+        var selectedEle = {};
+        return browser.elementIdName(ele.value.ELEMENT).then(function(res) {
+            selectedEle.name = res.value;
+            return browser.elementIdAttribute(ele.value.ELEMENT,'id');
+        }).then(function(res) {
+            selectedEle.id = res.value;
+            var textId = '#'+selectedEle.id;
+            return browser.getValue(textId);
+        }).then(function(res) {
+            selectedEle.value = res;
+            console.log(selectedEle.name+" id:'"+selectedEle.id+"' value:'"+selectedEle.value+"'");
+            return selectedEle;
+        });
+    };
 
 });
