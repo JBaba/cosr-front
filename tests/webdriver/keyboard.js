@@ -5,15 +5,17 @@ describe('keyboard navigation', function() {
 
         yield openSearchUrl({"q": "apple", "g": "en"});
 
-        console.log("Test started..")
         // TAB should select the Search Input
-        yield browser.keys(["TAB","a","TAB","TAB","TAB"]);
+        yield browser.keys(["TAB"]);
 
         var focused = yield inspectElement(yield browser.elementActive());
         var ele = yield browser.elementActive();
 
         //yield is used for wait and process for function clousers
         selectedEle =yield printElement(ele);
+
+        yield browser.keys("TAB");
+        yield printElement(ele);
 
         assert.equal(focused.tag, "a");
 
