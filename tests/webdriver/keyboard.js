@@ -3,7 +3,8 @@ describe('keyboard navigation', function() {
 
     it('tab & arrow keys from STATIC page', function* () {
 
-        yield openSearchUrl({"q": "apple", "g": "en"});
+        //yield openSearchUrl({"q": "apple", "g": "en"});
+        yield openSearchUrl({});
 
         // TAB should select the Search Input
         yield browser.keys(["TAB"]);
@@ -14,7 +15,26 @@ describe('keyboard navigation', function() {
         //yield is used for wait and process for function clousers
         selectedEle =yield printElement(ele);
 
+        // TAB is add text 'TAB' into input field
         yield browser.keys("TAB");
+        yield printElement(ele);
+
+        // Back Space does not work
+        yield browser.keys("BS");
+        yield printElement(ele);
+
+        // select other element and try to perform TAB event
+        browser.click('input[id="s"]')
+        .pause(2000)
+        .keys(['TAB']);
+
+        focused = yield inspectElement(yield browser.elementActive());
+        ele = yield browser.elementActive();
+
+        // TAB event does not work
+        yield printElement(ele);
+
+        yield browser.keys(["TAB"]);
         yield printElement(ele);
 
         assert.equal(focused.tag, "a");
@@ -40,6 +60,20 @@ describe('keyboard navigation', function() {
             console.log(selectedEle.name+" id:'"+selectedEle.id+"' value:'"+selectedEle.value+"'");
             return selectedEle;
         });
+    };
+
+    openGoogleSearchUrl = function(opts) {
+            var url = "http://www.google.com/#";
+            var qs = [];
+            for (key in opts) {
+                qs.push(key + "=" + encodeURIComponent(opts[key]));
+            }
+            qs.sort();
+            if (qs.length > 0) {
+                url += qs.join("&");
+            }
+            console.log("Opening " + url);
+            return browser.url(url);
     };
 
 });
