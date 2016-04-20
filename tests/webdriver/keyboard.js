@@ -3,8 +3,8 @@ describe('keyboard navigation', function() {
 
     it('tab & arrow keys from STATIC page', function* () {
 
-        //yield openSearchUrl({"q": "apple", "g": "en"});
-        yield openSearchUrl({});
+        yield openSearchUrl({"q": "apple", "g": "en"});
+        //yield openSearchUrl({});
 
         // TAB should select the Search Input
         yield browser.keys(["TAB"]);
@@ -13,38 +13,59 @@ describe('keyboard navigation', function() {
         var ele = yield browser.elementActive();
 
         //yield is used for wait and process for function clousers
-        selectedEle =yield printElement(ele);
+        yield printElement(ele);
 
-        // TAB is add text 'TAB' into input field
+        // TAB adds text 'TAB' into input field
         yield browser.keys("TAB");
         yield printElement(ele);
 
-        // Back Space does not work
-        yield browser.keys("BS");
-        yield printElement(ele);
+        // Should clear input element inorder to perform TAB keyevent
+        yield browser.clearElement('#q')
 
-        // select other element and try to perform TAB event
-        browser.click('input[id="s"]')
-        .pause(2000)
-        .keys(['TAB']);
+        // Some first element should appear
+        var hits = yield browser.elements("#hits .r");
+        assert.equal(hits.value.length, 25);
+        console.log("Number of Search results:"+hits.value.length)
 
-        focused = yield inspectElement(yield browser.elementActive());
-        ele = yield browser.elementActive();
+        // Now after this TAB event SELECT element will gain focus
+        yield browser.keys(["Tab"]);
+        inspectValues = yield inspectElementName(yield browser.elementActive());
+        assert.equal(inspectValues.tagName, "select");
 
-        // TAB event does not work
-        yield printElement(ele);
+        // Now after this TAB event Search Button element will gain focus
+        yield browser.keys(["Tab"]);
+        inspectValues = yield inspectElementName(yield browser.elementActive());
+        assert.equal(inspectValues.tagName, "input");
 
-        yield browser.keys(["TAB"]);
-        yield printElement(ele);
+        // First result will be selected
+        yield browser.keys(["Tab"]);
+        inspectValues = yield inspectElementName(yield browser.elementActive());
+        assert.equal(inspectValues.tagName, "a");
 
-        assert.equal(focused.tag, "a");
+        // Arrow down should select the next result.
+        yield browser.keys(["\ue015","\ue015","\ue015","\ue013","\ue015"]);
+        inspectValues = yield inspectElementName(yield browser.elementActive());
+        assert.equal(inspectValues.tagName, "a");
 
-        // Arrow down should select the first result.
-        yield browser.keys(["ARROW_DOWN"]);
-        assert.equal(focused.tag, "a");
-        assert.ok(focused.text.indexOf("Apple") >= 0);
+        yield browser.clearElement(".a");
+        // Arrow down should select the next result.
+        yield browser.keys(["\ue013","\ue015"]);
+        inspectValues = yield inspectElementName(yield browser.elementActive());
+        assert.equal(inspectValues.tagName, "a");
 
     });
+
+    inspectElementName = function(ele){
+        inspectValues = {};
+        return browser.elementIdName(ele.value.ELEMENT).then(function(res) {
+            inspectValues.tagName = res.value;
+            return browser.elementIdAttribute(ele.value.ELEMENT,'tabindex');
+        }).then(function(res) {
+            inspectValues.tabindex = res.value;
+            console.log("selected tag name:<"+inspectValues.tagName+"> and tabindex:"+inspectValues.tabindex);
+            return inspectValues;
+        });
+    };
 
     printElement = function(ele) {
         var selectedEle = {};
@@ -60,20 +81,6 @@ describe('keyboard navigation', function() {
             console.log(selectedEle.name+" id:'"+selectedEle.id+"' value:'"+selectedEle.value+"'");
             return selectedEle;
         });
-    };
-
-    openGoogleSearchUrl = function(opts) {
-            var url = "http://www.google.com/#";
-            var qs = [];
-            for (key in opts) {
-                qs.push(key + "=" + encodeURIComponent(opts[key]));
-            }
-            qs.sort();
-            if (qs.length > 0) {
-                url += qs.join("&");
-            }
-            console.log("Opening " + url);
-            return browser.url(url);
     };
 
 });
